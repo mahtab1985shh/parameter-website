@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>پارامتر | راهکار جامع مدیریت پروژه</title>
+<meta name="description" content="نمایش هوشمند چالش‌های پروژه و تبدیل آن‌ها به یک راهکار جامع با پارامتر." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800&family=Archivo+Black&family=Hind:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --background: oklch(0.115 0.025 255);
+  --foreground: oklch(0.96 0.015 210);
+  --primary: oklch(0.83 0.17 190);
+  --primary-foreground: oklch(0.1 0.025 250);
+  --muted: oklch(0.2 0.025 260);
+  --muted-foreground: oklch(0.68 0.045 235);
+  --border: oklch(0.71 0.12 220 / 0.18);
+  --ring: oklch(0.83 0.17 190);
+  --surface-deep: oklch(0.13 0.03 255);
+  --surface-raised: oklch(0.18 0.04 257 / 0.8);
+  --grid-line: oklch(0.78 0.13 205 / 0.08);
+  --flow-cyan: oklch(0.83 0.17 190);
+  --flow-green: oklch(0.87 0.2 160);
+  --flow-blue: oklch(0.68 0.2 250);
+  --flow-violet: oklch(0.62 0.23 295);
+  --flow-pink: oklch(0.7 0.22 335);
+  --glow-cyan: oklch(0.83 0.17 190 / 0.32);
+  --glow-violet: oklch(0.62 0.23 295 / 0.3);
+}
+* { box-sizing: border-box; border-color: var(--border); }
+html { scroll-behavior: smooth; background: var(--background); }
+body { margin: 0; background: var(--background); color: var(--foreground); font-family: "Vazirmatn", ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+button, a { font: inherit; }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+svg.icon { flex: none; }
+
+.parameter-page {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 53%, color-mix(in oklab, var(--flow-cyan) 10%, transparent), transparent 27rem),
+    radial-gradient(circle at 83% 60%, color-mix(in oklab, var(--flow-violet) 8%, transparent), transparent 24rem),
+    linear-gradient(180deg, var(--surface-deep), var(--background));
+  color: var(--foreground);
+}
+.ambient-grid {
+  position: absolute; inset: 0; pointer-events: none; opacity: .86;
+  background-image: radial-gradient(circle, var(--grid-line) .8px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: linear-gradient(to bottom, transparent, black 12%, black 82%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 12%, black 82%, transparent);
+}
+.page-header { position: relative; z-index: 4; height: 72px; padding: 0 clamp(24px, 6vw, 96px); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: color-mix(in oklab, var(--background) 84%, transparent); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+.brand { color: var(--foreground); text-decoration: none; display: flex; align-items: center; gap: 10px; font-size: 1.05rem; font-weight: 800; }
+.brand-mark { width: 34px; height: 34px; display: grid; place-items: center; color: var(--primary); border: 1px solid color-mix(in oklab, var(--primary) 45%, transparent); background: color-mix(in oklab, var(--primary) 8%, transparent); box-shadow: 0 0 25px var(--glow-cyan); clip-path: polygon(25% 0, 75% 0, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0 75%, 0 25%); }
+.header-context { display: flex; align-items: center; gap: 9px; font-size: .74rem; color: var(--muted-foreground); }
+.live-dot, .status-pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 12px var(--primary); animation: pulse-soft 2s infinite; }
+.intro { position: relative; z-index: 2; max-width: 850px; margin: 0 auto; padding: 54px 24px 30px; text-align: center; }
+.eyebrow { width: fit-content; margin: 0 auto 18px; display: flex; gap: 8px; align-items: center; color: var(--primary); font-size: .74rem; font-weight: 700; }
+.intro h1 { margin: 0; font-family: "Archivo Black", "Vazirmatn", sans-serif; font-size: clamp(2.45rem, 5.6vw, 5.25rem); line-height: 1.08; font-weight: 800; }
+.intro h1 span { color: transparent; background: linear-gradient(90deg, var(--flow-cyan), var(--flow-blue), var(--flow-violet)); background-clip: text; -webkit-background-clip: text; }
+.intro > p:last-child { max-width: 630px; margin: 22px auto 0; color: var(--muted-foreground); line-height: 2; font-size: .95rem; }
+.graph-shell { position: relative; z-index: 2; width: min(1180px, calc(100% - 40px)); margin: 0 auto 84px; border: 1px solid var(--border); border-radius: 8px; background: color-mix(in oklab, var(--surface-raised) 76%, transparent); box-shadow: 0 35px 100px oklch(0.02 0.02 260 / .7), inset 0 1px color-mix(in oklab, var(--flow-cyan) 10%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); overflow: hidden; }
+.graph-toolbar { height: 48px; padding: 0 17px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); color: var(--muted-foreground); font-size: .68rem; }
+.graph-toolbar div { display: flex; align-items: center; gap: 8px; }
+.graph-toolbar button { width: 30px; height: 30px; border: 1px solid var(--border); border-radius: 5px; display: grid; place-items: center; color: var(--muted-foreground); background: var(--muted); cursor: pointer; transition: color .2s, border-color .2s; }
+.graph-toolbar button:hover { color: var(--primary); border-color: color-mix(in oklab, var(--primary) 50%, transparent); }
+.graph-canvas { direction: ltr; position: relative; height: 700px; background-image: radial-gradient(circle, color-mix(in oklab, var(--primary) 24%, transparent) .65px, transparent .8px); background-size: 18px 18px; }
+.connections { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.path-base, .path-flow { fill: none; vector-effect: non-scaling-stroke; }
+.path-base { stroke: color-mix(in oklab, var(--flow-cyan) 27%, transparent); stroke-width: 1.2; }
+.path-flow { stroke: url(#neonFlow); stroke-width: 2.2; stroke-dasharray: 8 20; animation: dash-flow 2.8s linear infinite; filter: url(#lineGlow); }
+.path-main-base { stroke-width: 3; }
+.path-main { stroke-width: 3.2; animation-duration: 1.7s; }
+.path-flow-1 { animation-delay: -.4s; }.path-flow-2 { animation-delay: -1.1s; }.path-flow-3 { animation-delay: -1.8s; }.path-flow-4 { animation-delay: -2.5s; }.path-flow-5 { animation-delay: -3.2s; }.path-flow-6 { animation-delay: -3.9s; }
+.flow-particle { fill: var(--flow-cyan); filter: url(#lineGlow); }
+.particle-b { fill: var(--flow-violet); }
+.particle-main { fill: var(--flow-pink); }
+.network-caption { position: absolute; left: 26px; top: 22px; display: flex; align-items: center; gap: 8px; color: var(--muted-foreground); font-family: "Hind", sans-serif; font-size: .64rem; text-transform: uppercase; }
+.network-caption span { width: 7px; height: 7px; border-radius: 50%; background: var(--flow-green); box-shadow: 0 0 12px var(--flow-green); animation: pulse-soft 2s infinite; }
+.problem-node { direction: rtl; position: absolute; width: 180px; height: 76px; display: flex; align-items: center; gap: 10px; padding: 0 12px; border: 1px solid var(--border); border-radius: 7px; background: color-mix(in oklab, var(--surface-raised) 88%, transparent); color: var(--foreground); font-size: .72rem; font-weight: 650; cursor: pointer; box-shadow: 0 12px 30px oklch(0.04 0.03 260 / .55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transition: transform .25s, border-color .25s, box-shadow .25s; }
+.problem-node:hover { transform: translateY(-3px); border-color: color-mix(in oklab, var(--primary) 55%, transparent); }
+.problem-node.is-active { border-color: var(--flow-cyan); box-shadow: 0 0 0 1px color-mix(in oklab, var(--flow-cyan) 28%, transparent), 0 0 28px var(--glow-cyan); }
+.problem-delay { left: 58px; top: 116px; }.problem-cost { left: 26px; top: 306px; }.problem-team { left: 58px; top: 512px; }.problem-risk { left: 380px; top: 77px; }.problem-scope { left: 380px; top: 547px; }.problem-quality { left: 660px; top: 510px; }
+.node-icon { flex: none; width: 33px; height: 33px; border-radius: 5px; display: grid; place-items: center; color: var(--primary); background: color-mix(in oklab, var(--primary) 10%, transparent); }
+.node-copy { min-width: 0; flex: 1; display: grid; gap: 2px; text-align: right; }.node-copy small { color: var(--muted-foreground); font-family: "Hind", sans-serif; font-size: .54rem; }.node-copy strong { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: .68rem; }.node-copy i { width: 100%; height: 2px; margin-top: 4px; overflow: hidden; background: var(--muted); }.node-copy b { display: block; height: 100%; background: linear-gradient(90deg, var(--flow-violet), var(--flow-cyan)); box-shadow: 0 0 8px var(--flow-cyan); }.severity-57 { width: 57%; }.severity-64 { width: 64%; }.severity-72 { width: 72%; }.severity-78 { width: 78%; }.severity-83 { width: 83%; }.severity-91 { width: 91%; }
+.node-signal { position: absolute; right: -5px; width: 9px; height: 9px; border-radius: 50%; background: var(--background); border: 2px solid var(--flow-cyan); box-shadow: 0 0 12px var(--flow-cyan); }
+.detail-node { direction: rtl; position: absolute; left: 690px; top: 92px; width: 205px; min-height: 170px; padding: 17px; border: 1px solid color-mix(in oklab, var(--flow-blue) 38%, transparent); border-radius: 7px; background: color-mix(in oklab, var(--surface-raised) 90%, transparent); box-shadow: 0 18px 42px oklch(0.03 0.03 260 / .55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.detail-topline { display: flex; align-items: center; gap: 7px; color: var(--flow-blue); font-size: .64rem; }
+.detail-topline span { margin-right: auto; color: var(--muted-foreground); }
+.detail-node h2 { font-size: 1rem; margin: 19px 0 8px; }
+.detail-node p { color: var(--muted-foreground); font-size: .67rem; line-height: 1.9; margin: 0; min-height: 50px; }
+.detail-chips { display: flex; gap: 5px; margin-top: 13px; }
+.detail-chips span { padding: 5px 7px; border: 1px solid var(--border); border-radius: 4px; color: var(--muted-foreground); background: var(--muted); font-size: .55rem; }
+.ai-core { direction: rtl; position: absolute; left: 493px; top: 290px; width: 132px; height: 132px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid color-mix(in oklab, var(--flow-cyan) 64%, transparent); border-radius: 26px; background: radial-gradient(circle, color-mix(in oklab, var(--flow-cyan) 16%, var(--surface-raised)), var(--surface-deep)); box-shadow: 0 0 55px var(--glow-cyan), inset 0 0 30px color-mix(in oklab, var(--flow-blue) 13%, transparent); color: var(--flow-cyan); }
+.core-glow { position: absolute; inset: 24px; border-radius: 18px; background: color-mix(in oklab, var(--flow-cyan) 12%, transparent); filter: blur(18px); animation: core-breathe 2.8s ease-in-out infinite; }.core-chip { position: relative; width: 49px; height: 49px; display: grid; place-items: center; border: 1px solid color-mix(in oklab, var(--flow-cyan) 50%, transparent); border-radius: 12px; transform: rotate(45deg); }.core-chip svg { transform: rotate(-45deg); }
+.ai-core strong { color: var(--foreground); margin-top: 7px; font-size: .67rem; }.ai-core small { color: var(--flow-green); font-family: "Archivo Black", sans-serif; font-size: .42rem; margin-top: 7px; }.ai-core em { color: var(--muted-foreground); font-style: normal; font-size: .48rem; margin-top: 1px; }
+.orbit { position: absolute; inset: -12px; border: 1px solid color-mix(in oklab, var(--flow-cyan) 32%, transparent); border-radius: 31px; border-top-color: var(--flow-cyan); animation: orbit 7s linear infinite; }
+.orbit-two { inset: -24px; border-color: color-mix(in oklab, var(--flow-violet) 24%, transparent); border-bottom-color: var(--flow-violet); border-radius: 38px; animation-duration: 11s; animation-direction: reverse; }
+.solution-node { direction: rtl; position: absolute; left: 895px; top: 230px; width: 190px; min-height: 245px; padding: 28px 16px 20px; text-align: center; border: 1px solid color-mix(in oklab, var(--flow-violet) 64%, transparent); border-radius: 8px; background: linear-gradient(145deg, color-mix(in oklab, var(--flow-violet) 15%, var(--surface-raised)), var(--surface-raised)); box-shadow: 0 0 60px var(--glow-violet), inset 0 1px color-mix(in oklab, var(--flow-cyan) 14%, transparent); }
+.solution-halo { position: absolute; inset: -12px; border: 1px solid color-mix(in oklab, var(--flow-violet) 20%, transparent); border-radius: 12px; animation: halo 2.8s ease-in-out infinite; pointer-events: none; }
+.solution-icon { width: 49px; height: 49px; margin: 0 auto 16px; display: grid; place-items: center; color: var(--primary-foreground); background: linear-gradient(135deg, var(--flow-cyan), var(--flow-violet)); border-radius: 7px; box-shadow: 0 0 30px var(--glow-violet); }
+.solution-node > p { color: var(--muted-foreground); font-size: .62rem; margin: 0; }.solution-node h2 { font-size: 2.15rem; margin: 5px 0 18px; }
+.solution-node h2 { font-family: "Archivo Black", "Vazirmatn", sans-serif; }
+.solution-points { display: grid; gap: 7px; text-align: right; }.solution-points span { display: flex; align-items: center; gap: 7px; color: var(--muted-foreground); font-size: .6rem; }.solution-points svg { color: var(--flow-cyan); }
+.mobile-flow { display: none; }
+footer { position: relative; z-index: 2; min-height: 92px; padding: 25px clamp(24px, 6vw, 96px); border-top: 1px solid var(--border); display: flex; align-items: center; gap: 18px; color: var(--muted-foreground); font-size: .68rem; }
+footer > span { color: var(--foreground); font-size: .85rem; font-weight: 800; } footer p { margin: 0; } .footer-x { margin-right: auto; opacity: .25; display: inline-flex; }
+.is-paused *, .is-paused *::before, .is-paused *::after { animation-play-state: paused !important; }
+
+@keyframes dash-flow { to { stroke-dashoffset: -56; } }
+@keyframes orbit { to { transform: rotate(360deg); } }
+@keyframes halo { 50% { opacity: .35; transform: scale(1.035); } }
+@keyframes pulse-soft { 50% { opacity: .4; box-shadow: 0 0 4px var(--primary); } }
+@keyframes core-breathe { 50% { opacity: .55; transform: scale(1.18); } }
+
+@media (max-width: 900px) {
+  .intro { padding-top: 50px; }
+  .graph-shell { width: min(560px, calc(100% - 28px)); }
+  .graph-canvas { direction: rtl; height: auto; padding: 64px 18px 28px; display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
+  .connections, .network-caption { display: none; }
+  .problem-node, .detail-node, .ai-core, .solution-node { position: relative; inset: auto; width: 100%; }
+  .problem-node { height: 72px; justify-content: flex-start; }
+  .problem-node:hover { transform: none; }
+  .node-signal { right: auto; left: 16px; }
+  .detail-node { min-height: auto; margin: 7px 0 22px; }
+  .ai-core { width: 132px; height: 132px; align-self: center; margin: 12px 0 30px; }
+  .solution-node { min-height: 225px; align-self: center; width: min(100%, 280px); }
+  .mobile-flow { display: flex; position: absolute; top: 49px; right: 12px; bottom: 0; width: 8px; align-items: center; flex-direction: column; opacity: .6; }
+  .mobile-flow span { width: 7px; height: 7px; border-radius: 50%; background: var(--flow-cyan); box-shadow: 0 0 10px var(--flow-cyan); }
+  .mobile-flow i { flex: 1; width: 1px; min-height: 90px; background: linear-gradient(var(--flow-cyan), var(--flow-violet)); }
+}
+@media (max-width: 560px) {
+  .page-header { height: 66px; padding: 0 18px; }.header-context { font-size: .59rem; }
+  .intro { padding: 42px 20px 28px; }.intro h1 { font-size: 2.55rem; }.intro > p:last-child { font-size: .8rem; }
+  footer { align-items: flex-start; flex-direction: column; gap: 6px; }.footer-x { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}
+</style>
+<style>.parameter-page{background:linear-gradient(180deg,#fff 0,#0d142b 9%,#0d142b 90%,#fff 100%)}.parameter-page:before{content:"";position:absolute;z-index:1;top:0;left:0;right:0;height:140px;background:linear-gradient(180deg,#fff,rgba(255,255,255,.72),transparent);pointer-events:none;opacity:.9}.parameter-page:after{content:"";position:absolute;z-index:3;left:0;right:0;bottom:0;height:150px;background:linear-gradient(180deg,transparent,#fff);pointer-events:none}.page-header{background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(13,20,43,.82) 72%);border-bottom-color:transparent}.graph-shell{width:100%;margin:0;border-left:0;border-right:0;border-radius:0;background:transparent;box-shadow:none}.graph-canvas{height:720px}.intro{padding-top:76px}@media(max-width:900px){.graph-shell{width:100%}.graph-canvas{height:auto;min-height:760px}}</style><style>html,body{overflow:hidden!important;height:100%;background:#0d142b}.page-header,.intro{display:none!important}.parameter-page{min-height:100%;height:100%;background:linear-gradient(180deg,#fff 0,#0d142b 13%,#0d142b 88%,#fff 100%)}.graph-shell{height:100%;margin:0!important;border:0!important;overflow:hidden!important}.graph-canvas{height:760px!important}.ambient-grid{opacity:.55}</style><style>.parameter-page{background:linear-gradient(180deg,#fff 0,#f5f8fc 12%,#eef3f8 88%,#fff 100%);color:#101828}.graph-canvas{background-color:#f7faff;color:#101828}.graph-toolbar{color:#475467}.network-caption{color:#475467}.problem-node,.detail-node{background:rgba(255,255,255,.92);color:#101828;box-shadow:0 12px 30px rgba(16,24,40,.12)}.node-copy strong,.detail-node h2{color:#101828}.node-copy small,.detail-node p,.detail-chips span{color:#667085}.ai-core{left:50%;transform:translateX(-50%);background:radial-gradient(circle,#e4fbff,#dce8f6);color:#075985;box-shadow:0 0 35px rgba(56,189,248,.25)}.ai-core strong{color:#101828}.solution-node{left:calc(100% - 285px);background:linear-gradient(145deg,#fff,#eef2ff);color:#101828;box-shadow:0 0 35px rgba(99,102,241,.22)}.solution-node h2{color:#111827}.solution-node>p,.solution-points span{color:#475467}.page-header{color:#101828;background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(245,248,252,.88))}.brand,.header-context{color:#101828}</style><style>.detail-node{display:none!important}.problem-node{box-shadow:0 8px 22px rgba(16,24,40,.08);border-color:#d7e2ee}.solution-node{box-shadow:0 12px 30px rgba(99,102,241,.14)}.graph-toolbar{display:none}.graph-canvas{height:760px!important}.connections{z-index:0}.problem-node,.ai-core,.solution-node{z-index:2}</style><style>html,body{background:#fff!important}.parameter-page{background:linear-gradient(180deg,#fff,#f7faff 100px,#f7faff calc(100% - 100px),#fff)!important}.graph-canvas{background-color:transparent!important}.graph-shell{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}.parameter-page:before{display:none!important}</style><style>html,body,.parameter-page,.graph-shell,.graph-canvas{background:#fff!important}.ambient-grid{display:none!important}.parameter-page:before,.parameter-page:after{display:none!important}</style><style>
+.graph-canvas{width:100%;height:760px!important;display:block!important;padding:0!important}
+.graph-canvas .problem-node{position:absolute!important;width:180px;height:76px;margin:0;transform:none!important}
+.graph-canvas .problem-delay{left:12%;top:140px}.graph-canvas .problem-cost{left:12%;top:330px}.graph-canvas .problem-team{left:12%;top:520px}
+.graph-canvas .problem-risk{left:39%;top:100px}.graph-canvas .problem-scope{left:39%;top:560px}.graph-canvas .problem-quality{left:65%;top:560px}
+.graph-canvas .ai-core{position:absolute!important;left:54%;top:305px;width:132px;height:132px;transform:none!important;margin:0}
+.graph-canvas .solution-node{position:absolute!important;left:auto;right:5%;top:248px;width:190px;margin:0}
+.connections{display:block!important;z-index:0}.path-base{stroke:#cddce8;stroke-width:1;opacity:.35}.path-flow{stroke-dasharray:1 10;stroke-linecap:round;stroke-width:2.4;filter:none;animation:connected-dots 3s linear infinite}.node-signal,.mobile-flow,.flow-particle{display:none!important}
+@keyframes connected-dots{to{stroke-dashoffset:-44}}
+@media(max-width:1000px){.graph-canvas .problem-node{width:150px}.graph-canvas .problem-delay,.graph-canvas .problem-cost,.graph-canvas .problem-team{left:7%}.graph-canvas .problem-risk,.graph-canvas .problem-scope{left:32%}.graph-canvas .solution-node{width:165px;right:2%}.graph-canvas .ai-core{left:53%;width:110px;height:110px}}
+@media(max-width:650px){.graph-canvas .problem-node{width:42%;height:70px}.graph-canvas .problem-delay{left:5%;top:35px}.graph-canvas .problem-cost{left:53%;top:35px}.graph-canvas .problem-team{left:5%;top:140px}.graph-canvas .problem-risk{left:53%;top:140px}.graph-canvas .problem-scope{left:5%;top:245px}.graph-canvas .problem-quality{left:53%;top:245px}.graph-canvas .ai-core{left:calc(50% - 55px);top:405px}.graph-canvas .solution-node{left:calc(50% - 95px);right:auto;top:565px;width:190px;min-height:0;padding:12px}.solution-icon,.solution-halo{display:none}.solution-node h2{font-size:24px;margin:4px}.solution-points{gap:3px}.graph-canvas .solution-node{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.path-flow{animation:none!important}}
+</style><style>
+.graph-canvas .problem-node{overflow:visible!important;width:19%;height:76px}
+.node-explanation{position:absolute;top:calc(100% + 12px);right:0;left:0;display:block;font-size:13px;font-weight:400;line-height:1.85;color:#505b6d;text-align:right;pointer-events:none}
+.graph-canvas .problem-delay{left:74%;top:100px}.graph-canvas .problem-cost{left:74%;top:320px}.graph-canvas .problem-team{left:74%;top:540px}
+.graph-canvas .problem-risk{left:46%;top:100px}.graph-canvas .problem-scope{left:46%;top:540px}.graph-canvas .problem-quality{left:46%;top:320px}
+.graph-canvas .ai-core{left:27%;top:300px;width:110px;height:110px}
+.graph-canvas .solution-node{left:3%;right:auto;top:245px;width:18%;min-height:230px}
+.path-flow{stroke-linejoin:round}
+@media(max-width:650px){.graph-canvas .problem-node{width:42%;height:64px}.graph-canvas .problem-delay{left:5%;top:20px}.graph-canvas .problem-cost{left:53%;top:20px}.graph-canvas .problem-team{left:5%;top:180px}.graph-canvas .problem-risk{left:53%;top:180px}.graph-canvas .problem-scope{left:5%;top:340px}.graph-canvas .problem-quality{left:53%;top:340px}.node-explanation{font-size:12px;line-height:1.7;top:calc(100% + 7px)}.graph-canvas .ai-core{left:65%;top:570px;width:90px;height:90px}.graph-canvas .solution-node{left:5%;right:auto;top:550px;width:45%;min-height:0}}
+</style><style>
+/* Keep connector endpoints driven by measured node bounds. */
+.graph-canvas .problem-node{width:16%;padding-inline:9px}
+.graph-canvas .ai-core{width:126px;height:126px;top:292px}
+.graph-canvas .core-chip{width:62px;height:62px}
+.graph-canvas .core-chip svg{width:32px;height:32px}
+.graph-canvas .solution-node{width:16%;min-height:210px;top:253px;padding:20px 12px 16px}
+.solution-node h2{font-size:1.85rem;margin:5px 0 13px}
+.solution-icon{width:42px;height:42px;margin-bottom:12px}
+@media(max-width:650px){.graph-canvas .problem-node{width:39%}.graph-canvas .ai-core{width:108px;height:108px;left:63%;top:562px}.graph-canvas .core-chip{width:53px;height:53px}.graph-canvas .solution-node{width:40%;left:5%;top:550px;min-height:0;padding:12px}.solution-node h2{font-size:24px;margin:4px}}
+</style><style>
+.graph-canvas .problem-node{border-radius:21px;gap:8px}
+.graph-canvas .node-icon{border-radius:11px}
+.graph-canvas .node-copy strong{font-size:14px;line-height:1.7;white-space:normal;overflow:visible;text-overflow:clip;font-weight:700}
+.graph-canvas .node-copy{gap:5px}
+.graph-canvas .solution-node{border-radius:25px}
+.graph-canvas .solution-halo{border-radius:31px}
+@media(max-width:650px){.graph-canvas .problem-node{border-radius:18px}.graph-canvas .node-copy strong{font-size:13px;line-height:1.5}.graph-canvas .node-icon{width:27px;height:30px}}
+</style><style>.graph-canvas .problem-node{border-radius:999px;padding-inline:16px}.graph-canvas .solution-node{border-radius:32px}.graph-canvas .solution-halo{border-radius:40px}@media(max-width:650px){.graph-canvas .problem-node{border-radius:999px;padding-inline:11px}}</style><style>
+/* An asymmetric constellation, flowing from scattered inputs toward Parameter. */
+@media(min-width:901px){
+.graph-canvas .problem-node{width:16%;height:72px;box-shadow:0 5px 22px #4d47700b;border-color:#e1dded;background:#fff}
+.graph-canvas .problem-delay{left:78%;top:75px}
+.graph-canvas .problem-cost{left:66%;top:315px}
+.graph-canvas .problem-team{left:79%;top:550px}
+.graph-canvas .problem-risk{left:50%;top:150px}
+.graph-canvas .problem-scope{left:47%;top:555px}
+.graph-canvas .problem-quality{left:25%;top:75px}
+.graph-canvas .ai-core{left:39%;top:350px;width:116px;height:116px;border-radius:29px;box-shadow:0 0 0 12px #ebf8fc65,0 0 45px #67cfde24}
+.graph-canvas .solution-node{left:6%;right:auto;top:332px;width:20%;min-height:216px;padding:24px 20px;background:linear-gradient(145deg,#faf8ff,#fff 75%);border-color:#bfb0ec;box-shadow:0 15px 50px #5b478e12}
+.graph-canvas .solution-node h2{font-size:34px}.graph-canvas .node-explanation{font-size:13px;color:#828092;line-height:1.85;padding-inline:5px}
+.graph-canvas .problem-delay .node-icon,.graph-canvas .problem-risk .node-icon{color:#8370ca;background:#f3efff}
+.graph-canvas .problem-cost .node-icon,.graph-canvas .problem-scope .node-icon{color:#238e9c;background:#eaf8f9}
+.graph-canvas .problem-team .node-icon,.graph-canvas .problem-quality .node-icon{color:#5285bd;background:#eff6fd}
+}
+.graph-canvas .path-base{stroke:#d9d6e5;opacity:.5;stroke-width:1}.graph-canvas .path-flow{stroke-width:2;stroke-dasharray:1 12;opacity:.85}
+.graph-canvas .path-flow:nth-of-type(4n){stroke:#6f93ce}.graph-canvas .path-flow:nth-of-type(6n){stroke:#4cb3b1}
+.graph-canvas .problem-node:hover{border-color:#b6a9df;box-shadow:0 8px 26px #77639c17}
+@media(min-width:651px) and (max-width:900px){.graph-canvas .node-copy strong{font-size:12px}.graph-canvas .problem-node{padding-inline:9px}.graph-canvas .node-icon{width:24px}}
+</style><style>
+.graph-canvas .solution-node{left:calc(50% - 110px);right:auto;top:260px;width:220px;min-height:210px;padding:22px 20px;transform:none!important;border-radius:32px}
+.graph-canvas .ai-core{left:calc(50% - 78px);top:555px;width:156px;height:142px;transform:none!important;border-radius:30px;padding:14px 10px;gap:8px}
+.graph-canvas .ai-core strong{font-size:13px;line-height:1.8;text-align:center;margin:5px 0 0;color:#26364a}.graph-canvas .core-chip{width:52px;height:52px;flex-shrink:0}
+.graph-canvas .problem-node{width:17%;height:72px}
+.graph-canvas .problem-delay{left:75%;top:88px}.graph-canvas .problem-cost{left:80%;top:327px}.graph-canvas .problem-team{left:72%;top:548px}
+.graph-canvas .problem-risk{left:14%;top:55px}.graph-canvas .problem-scope{left:5%;top:295px}.graph-canvas .problem-quality{left:13%;top:532px}
+@media(min-width:651px) and (max-width:1000px){.graph-canvas .solution-node{width:184px;left:calc(50% - 92px)}.graph-canvas .problem-node{width:21%;padding-inline:9px}.graph-canvas .problem-delay{left:73%}.graph-canvas .problem-cost{left:77%}.graph-canvas .problem-team{left:72%}.graph-canvas .problem-risk{left:7%}.graph-canvas .problem-scope{left:2%}.graph-canvas .problem-quality{left:7%}}
+@media(max-width:650px){.graph-canvas{height:1060px!important;min-height:1060px!important}.graph-canvas .problem-node{width:40%;height:68px}.graph-canvas .problem-delay{left:55%;top:25px}.graph-canvas .problem-risk{left:5%;top:55px}.graph-canvas .problem-cost{left:55%;top:195px}.graph-canvas .problem-scope{left:5%;top:225px}.graph-canvas .problem-team{left:55%;top:365px}.graph-canvas .problem-quality{left:5%;top:395px}.graph-canvas .solution-node{left:calc(50% - 100px);right:auto;top:600px;width:200px;min-height:190px}.graph-canvas .ai-core{left:calc(50% - 78px);top:865px;width:156px;height:142px}.graph-canvas .core-chip{width:48px;height:48px}.graph-canvas .ai-core strong{font-size:13px}}
+</style><style>
+.graph-canvas .problem-node{width:16%;height:76px}
+.graph-canvas .problem-delay{left:74%;top:100px}.graph-canvas .problem-cost{left:74%;top:320px}.graph-canvas .problem-team{left:74%;top:540px}
+.graph-canvas .problem-risk{left:46%;top:100px}.graph-canvas .problem-scope{left:46%;top:540px}.graph-canvas .problem-quality{left:46%;top:320px}
+.graph-canvas .ai-core{left:27%;top:292px;width:126px;height:126px;padding:10px;gap:2px;transform:none!important}.graph-canvas .core-chip{width:52px;height:52px}.graph-canvas .ai-core strong{font-size:12px;line-height:1.7}
+.graph-canvas .solution-node{left:3%;right:auto;top:253px;width:16%;min-height:210px;padding:20px 12px 16px;transform:none!important}
+@media(max-width:650px){.graph-canvas{height:760px!important;min-height:760px!important}.graph-canvas .problem-node{width:39%;height:64px}.graph-canvas .problem-delay{left:5%;top:20px}.graph-canvas .problem-cost{left:53%;top:20px}.graph-canvas .problem-team{left:5%;top:180px}.graph-canvas .problem-risk{left:53%;top:180px}.graph-canvas .problem-scope{left:5%;top:340px}.graph-canvas .problem-quality{left:53%;top:340px}.graph-canvas .ai-core{left:63%;top:562px;width:108px;height:120px}.graph-canvas .core-chip{width:44px;height:44px}.graph-canvas .solution-node{left:5%;right:auto;top:550px;width:40%;min-height:0;padding:12px}}
+</style><style>
+.graph-canvas .problem-delay{background:#f0eaff;border-color:#c8b6f0}.graph-canvas .problem-risk{background:#fce9f3;border-color:#efbbd7}
+.graph-canvas .problem-cost{background:#e5f6f2;border-color:#a5ddd0}.graph-canvas .problem-scope{background:#fff3d9;border-color:#ead08e}
+.graph-canvas .problem-team{background:#e8f2ff;border-color:#adcdee}.graph-canvas .problem-quality{background:#e6f8fb;border-color:#a6dce5}
+.graph-canvas .node-icon{background:#ffffff85;border-radius:12px}.graph-canvas .node-copy strong{color:#302b46}
+.graph-canvas .solution-node{background:linear-gradient(145deg,#eee5ff,#e5f6ff);border-color:#bdace6;box-shadow:0 12px 38px #8272bd1a}
+.graph-canvas .ai-core{background:linear-gradient(135deg,#dcf8f5,#eae3ff);border-color:#a9cddb}
+.connections .flow-orb{pointer-events:none;filter:drop-shadow(0 0 5px currentColor)}
+@media(prefers-reduced-motion:reduce){.connections .flow-orb{display:none}}
+.is-paused .flow-orb{opacity:.6}
+</style><style>@font-face{font-family:Estedad;src:url('fonts-font-4.ttf') format('truetype');font-weight:100 900;font-display:swap}body,body :is(h1,h2,h3,p,small,strong,em){font-family:Estedad,Tahoma,sans-serif}</style><style>
+.graph-canvas{height:680px!important;min-height:680px!important}
+.graph-canvas .problem-node{left:78%!important;width:20%;height:64px;padding:8px 12px;box-shadow:none}
+.graph-canvas .problem-delay{top:45px}.graph-canvas .problem-cost{top:143px}.graph-canvas .problem-team{top:241px}.graph-canvas .problem-risk{top:339px}.graph-canvas .problem-scope{top:437px}.graph-canvas .problem-quality{top:535px}
+.graph-canvas .node-explanation{display:none}.graph-canvas .node-copy strong{font-size:13px}.graph-canvas .node-copy i{display:none}.graph-canvas .node-icon{width:29px;flex-shrink:0}
+.graph-canvas .ai-core{left:57%!important;top:265px;width:120px;height:120px;padding:10px;border-radius:26px}
+.graph-canvas .solution-node{left:35%!important;right:auto;top:244px;width:17%;min-height:162px;padding:15px 10px}
+.graph-canvas .solution-node h2{font-size:26px}.graph-canvas .solution-points{display:none}.graph-canvas .solution-node>p{font-size:11px}.graph-canvas .solution-icon{display:none}
+.outcome-node{position:absolute;left:2%;top:calc(45px + var(--row)*98px);width:25%;height:64px;direction:rtl;display:flex;align-items:center;gap:9px;padding:8px 13px;border:1px solid #cbe3dd;border-radius:16px;background:#f0f8f5;z-index:2;color:#302b46}.outcome-node strong{font-size:13px;font-weight:600}.outcome-node p{font-size:10px;line-height:1.7;margin:3px 0 0;color:#7b7787}.outcome-check{color:#39a58d;font-size:19px}.outcome-delay{background:#f4effc;border-color:#d6c8ed}.outcome-team{background:#eff5fd;border-color:#c8dbed}.outcome-risk{background:#fcf0f6;border-color:#edd3e1}.outcome-scope{background:#fcf7e9;border-color:#ecdfbb}.outcome-quality{background:#eff9fb;border-color:#c7e6eb}
+@media(max-width:650px){.graph-canvas{height:1150px!important;min-height:1150px!important}.graph-canvas .problem-node{width:42%;height:60px}.graph-canvas .problem-delay,.graph-canvas .problem-team,.graph-canvas .problem-scope{left:54%!important}.graph-canvas .problem-cost,.graph-canvas .problem-risk,.graph-canvas .problem-quality{left:4%!important}.graph-canvas .problem-delay,.graph-canvas .problem-cost{top:25px}.graph-canvas .problem-team,.graph-canvas .problem-risk{top:110px}.graph-canvas .problem-scope,.graph-canvas .problem-quality{top:195px}.graph-canvas .ai-core{left:calc(50% - 60px)!important;top:370px}.graph-canvas .solution-node{left:calc(50% - 80px)!important;top:580px;width:160px;min-height:140px}.outcome-node{width:44%;height:80px;padding:8px;gap:5px}.outcome-node strong{font-size:11px}.outcome-node p{font-size:9px}.outcome-delay,.outcome-team,.outcome-scope{left:53%}.outcome-cost,.outcome-risk,.outcome-quality{left:3%}.outcome-delay,.outcome-cost{top:825px}.outcome-team,.outcome-risk{top:930px}.outcome-scope,.outcome-quality{top:1035px}}
+</style><style>
+/* Narrow inputs and outputs; scattered incoming information, ordered results. */
+@media(min-width:651px){
+.graph-canvas .problem-node{width:10%;min-width:0;height:78px;padding:7px 8px;gap:4px;border-radius:20px}
+.graph-canvas .node-icon{display:none}.graph-canvas .node-copy strong{font-size:12px;line-height:1.8;text-align:center}.graph-canvas .node-copy{width:100%}
+.graph-canvas .problem-delay{left:87%!important;top:35px;transform:rotate(5deg)!important}
+.graph-canvas .problem-cost{left:79%!important;top:135px;transform:rotate(-4deg)!important}
+.graph-canvas .problem-team{left:88%!important;top:255px;transform:rotate(4deg)!important}
+.graph-canvas .problem-risk{left:77%!important;top:355px;transform:rotate(-6deg)!important}
+.graph-canvas .problem-scope{left:87%!important;top:460px;transform:rotate(3deg)!important}
+.graph-canvas .problem-quality{left:80%!important;top:565px;transform:rotate(-4deg)!important}
+.outcome-node{width:12.5%;left:9%;height:78px;padding:8px;gap:4px;border-radius:16px}
+.outcome-node strong{font-size:11px;line-height:1.8}.outcome-node p{font-size:9px;line-height:1.7}.outcome-check{font-size:15px;flex-shrink:0}
+}
+@media(max-width:650px){.graph-canvas .problem-node{width:21%;height:76px;padding:6px;gap:0;border-radius:15px}.graph-canvas .node-icon{display:none}.graph-canvas .node-copy strong{font-size:10px;line-height:1.8;text-align:center}.graph-canvas .problem-delay{left:72%!important;top:20px}.graph-canvas .problem-cost{left:15%!important;top:32px}.graph-canvas .problem-team{left:65%!important;top:120px}.graph-canvas .problem-risk{left:8%!important;top:137px}.graph-canvas .problem-scope{left:73%!important;top:223px}.graph-canvas .problem-quality{left:18%!important;top:239px}.outcome-node{width:22%;height:88px;padding:5px;flex-direction:column;gap:0;text-align:center}.outcome-delay,.outcome-team,.outcome-scope{left:61%}.outcome-cost,.outcome-risk,.outcome-quality{left:17%}.outcome-node strong{font-size:10px}.outcome-node p{font-size:8px}.outcome-check{font-size:12px}}
+</style><style>
+.graph-canvas .problem-node,.graph-canvas .problem-node:hover{transform:none!important}
+.outcome-check{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:23px;height:25px;color:#39a58d}
+.outcome-check svg{display:block;width:22px;height:22px}
+.outcome-delay .outcome-check{color:#9470e0}.outcome-team .outcome-check{color:#579cde}.outcome-risk .outcome-check{color:#dc80b5}.outcome-scope .outcome-check{color:#bc912f}.outcome-quality .outcome-check{color:#34a7b7}
+@media(max-width:650px){.outcome-check{height:22px}.outcome-check svg{width:19px;height:19px}}
+</style></head>
+
+<body>
+<main class="parameter-page" dir="rtl">
+  <div class="ambient-grid" aria-hidden="true"></div>
+  <header class="page-header">
+    <a class="brand" href="#top" aria-label="پارامتر، صفحه اصلی">
+      <span class="brand-mark"><!-- @license lucide-static v1.49.0 - ISC -->
+<svg
+  width="17" height="17" class="icon lucide lucide-sparkles"
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" />
+  <path d="M20 2v4" />
+  <path d="M22 4h-4" />
+  <circle cx="4" cy="20" r="2" />
+</svg></span>
+      <span>پارامتر</span>
+    </a>
+    <div class="header-context">
+      <span class="live-dot"></span>
+      سامانه تحلیل هوشمند پروژه
+    </div>
+  </header>
+
+  <section id="top" class="intro">
+    <p class="eyebrow"><!-- @license lucide-static v1.49.0 - ISC -->
+<svg
+  width="15" height="15" class="icon lucide lucide-brain-circuit"
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z" />
+  <path d="M9 13a4.5 4.5 0 0 0 3-4" />
+  <path d="M6.003 5.125A3 3 0 0 0 6.401 6.5" />
+  <path d="M3.477 10.896a4 4 0 0 1 .585-.396" />
+  <path d="M6 18a4 4 0 0 1-1.967-.516" />
+  <path d="M12 13h4" />
+  <path d="M12 18h6a2 2 0 0 1 2 2v1" />
+  <path d="M12 8h8" />
+  <path d="M16 8V5a2 2 0 0 1 2-2" />
+  <circle cx="16" cy="13" r=".5" />
+  <circle cx="18" cy="3" r=".5" />
+  <circle cx="20" cy="21" r=".5" />
+  <circle cx="20" cy="8" r=".5" />
+</svg> شبکه هوشمند تصمیم‌یار</p>
+    <h1>هر سیگنال، یک بینش.<br /><span>هر بینش، یک تصمیم.</span></h1>
+    <p>پارامتر سیگنال‌های پروژه را به یک مسیر شفاف، قابل‌اندازه‌گیری و هوشمند تبدیل می‌کند.</p>
+  </section>
+
+  <section class="graph-shell" aria-label="مسیر تبدیل مشکلات پروژه به راهکار پارامتر">
+    <div class="graph-toolbar">
+      <div><span class="status-pulse"></span> جریان تحلیل زنده</div>
+      <button type="button" id="pause-btn" aria-label="توقف حرکت" title="توقف حرکت">
+        <span id="icon-pause"><!-- @license lucide-static v1.49.0 - ISC -->
+<svg
+  width="16" height="16" class="icon lucide lucide-pause"
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <rect x="14" y="3" width="5" height="18" rx="1" />
+  <rect x="5" y="3" width="5" height="18" rx="1" />
+</svg></span>
+        <span id="icon-play" style="display:none"><!-- @license lucide-static v1.49.0 - ISC -->
+<svg
+  width="16" height="16" class="icon lucide lucide-play"
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" />
+</svg></span>
+      </button>
+    </div>
+
+    <div class="graph-canvas">
+      <svg class="connections" viewBox="0 0 1120 700" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="neonFlow" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="var(--flow-cyan)" />
+            <stop offset="0.52" stop-color="var(--flow-blue)" />
+            <stop offset="1" stop-color="var(--flow-violet)" />
+          </linearGradient>
+          <filter id="lineGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="5" result="blur" />
+            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+        </defs>
+        <g>
+          <path d="M 238 154 C 330 154, 375 278, 504 334" class="path-base" />
+          <path d="M 238 154 C 330 154, 375 278, 504 334" class="path-flow path-flow-1" />
+        </g>
+        <g>
+          <path d="M 206 344 C 330 344, 396 344, 504 352" class="path-base" />
+          <path d="M 206 344 C 330 344, 396 344, 504 352" class="path-flow path-flow-2" />
+        </g>
+        <g>
+          <path d="M 238 550 C 340 550, 390 430, 510 374" class="path-base" />
+          <path d="M 238 550 C 340 550, 390 430, 510 374" class="path-flow path-flow-3" />
+        </g>
+        <g>
+          <path d="M 470 115 C 470 205, 510 235, 535 304" class="path-base" />
+          <path d="M 470 115 C 470 205, 510 235, 535 304" class="path-flow path-flow-4" />
+        </g>
+        <g>
+          <path d="M 470 585 C 470 500, 510 458, 538 400" class="path-base" />
+          <path d="M 470 585 C 470 500, 510 458, 538 400" class="path-flow path-flow-5" />
+        </g>
+        <g>
+          <path d="M 745 548 C 682 500, 650 424, 594 394" class="path-base" />
+          <path d="M 745 548 C 682 500, 650 424, 594 394" class="path-flow path-flow-6" />
+        </g>
+        <path d="M 610 352 C 720 352, 780 352, 895 352" class="path-base path-main-base" />
+        <path d="M 610 352 C 720 352, 780 352, 895 352" class="path-flow path-main" />
+        <circle r="5" class="flow-particle particle-a"><animateMotion dur="3.8s" repeatCount="indefinite" path="M 238 154 C 330 154, 375 278, 504 334" /></circle>
+        <circle r="4" class="flow-particle particle-b"><animateMotion dur="4.3s" repeatCount="indefinite" path="M 470 585 C 470 500, 510 458, 538 400" /></circle>
+        <circle r="7" class="flow-particle particle-main"><animateMotion dur="2.8s" repeatCount="indefinite" path="M 610 352 C 720 352, 780 352, 895 352" /></circle>
+      </svg>
+
+      
+
+      <button type="button" class="problem-node problem-delay is-active" data-id="delay" aria-pressed="true">
+        <span class="node-icon"><!-- @license lucide-static v1.49.0 - ISC -->
+<svg
+  width="19" height="19" class="icon lucide lucide-clock-3"
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="10" />
+  <path d="M12 6v6h4" />
+</svg></span>
+        <span class="node-copy"><strong>تأخیر در زمان‌بندی</strong><i><b class="severity severity-78"></b></i></span>
+        <span class="node-signal"></span>
+      <span class="node-explanation">برنامه در یک فایل است و پیشرفت واقعی در گزارش‌های جدا؛ تأخیرها دیر دیده می‌شوند.</span></button>
+      <button type="button" class="problem-node problem-cost" data-id="cost" aria-pressed="false">
+        <span class="node-icon"><!-- @license lucide-static v1.49.0 - ISC -->
+<svg
+  width="19" height="19" class="icon lucide lucide-circle-dollar-sign"
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="10" />
+  <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+  <path d="M12 18V6" />
+</svg></span>
+        <span class="node-copy"><strong>افزایش هزینه‌ها</strong><i><b class="severity severity-91"></b></i></span>
+        <span class="node-signal"></span>
+      <span class="node-explanation">وقتی هزینه‌ها و قراردادها جدا ثبت شوند، تصویر بودجه به‌روز نیست.</span></button>
+      <button type="button" class="problem-node problem-team" data-id="team" aria-pressed="false">
+        <span class="node-icon"><!-- @license lucide-static v1.49.0 - ISC -->
+<svg
+  width="19" height="19" class="icon lucide lucide-users-round"
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M18 21a8 8 0 0 0-16 0" />
+  <circle cx="10" cy="8" r="5" />
+  <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
+</svg></span>
+        <span class="node-copy"><strong>ناهماهنگی تیم‌ها</strong><i><b class="severity severity-64"></b></i></span>
+        <span class="node-signal"></span>
+      <span class="node-explanation">آخرین اطلاعات بین کارگاه، دفتر فنی و پیام‌های افراد پراکنده است.</span></button>
+      <button type="button" class="problem-node problem-risk" data-id="risk" aria-pressed="false">
+        <span class="node-icon"><!-- @license lucide-static v1.49.0 - ISC -->
+<svg
+  width="19" height="19" class="icon lucide lucide-triangle-alert"
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+  <path d="M12 9v4" />
+  <path d="M12 17h.01" />
+</svg></span>
+        <span class="node-copy"><strong>ریسک‌های پنهان</strong><i><b class="severity severity-83"></b></i></span>
+        <span class="node-signal"></span>
+      <span class="node-explanation">نشانه‌های هشدار در گزارش‌های جدا می‌مانند و کنار هم دیده نمی‌شوند.</span></button>
+      <button type="button" class="problem-node problem-scope" data-id="scope" aria-pressed="false">
+        <span class="node-icon"><!-- @license lucide-static v1.49.0 - ISC -->
+<svg
+  width="19" height="19" class="icon lucide lucide-gauge"
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m12 14 4-4" />
+  <path d="M3.34 19a10 10 0 1 1 17.32 0" />
+</svg></span>
+        <span class="node-copy"><strong>تغییرات دامنه</strong><i><b class="severity severity-57"></b></i></span>
+        <span class="node-signal"></span>
+      <span class="node-explanation">اثر تغییرات بر زمان و هزینه، بدون اطلاعات مشترک روشن نیست.</span></button>
+      <button type="button" class="problem-node problem-quality" data-id="quality" aria-pressed="false">
+        <span class="node-icon"><!-- @license lucide-static v1.49.0 - ISC -->
+<svg
+  width="19" height="19" class="icon lucide lucide-file-warning"
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" />
+  <path d="M12 9v4" />
+  <path d="M12 17h.01" />
+</svg></span>
+        <span class="node-copy"><strong>افت کیفیت خروجی</strong><i><b class="severity severity-72"></b></i></span>
+        <span class="node-signal"></span>
+      <span class="node-explanation">نسخه‌های متفاوت اسناد، خطا و دوباره‌کاری ایجاد می‌کنند.</span></button>
+
+      <article class="detail-node" aria-live="polite">
+        <div class="detail-topline"><!-- @license lucide-static v1.49.0 - ISC -->
+<svg
+  width="17" height="17" class="icon lucide lucide-chart-no-axes-combined"
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12 16v5" />
+  <path d="M16 14.639V21" />
+  <path d="M20 10.656V21" />
+  <path d="m22 3-8.646 8.646a.5.5 0 0 1-.708 0L9.354 8.354a.5.5 0 0 0-.707 0L2 15" />
+  <path d="M4 18.463V21" />
+  <path d="M8 14.656V21" />
+</svg> تحلیل سیگنال <span id="detail-severity">78%</span></div>
+        <h2 id="detail-title">تأخیر در زمان‌بندی</h2>
+        <p id="detail-text">وابستگی‌های پنهان و نبود دید لحظه‌ای، تحویل را عقب می‌اندازد.</p>
+        <div class="detail-chips"><span>تشخیص الگو</span><span>پیش‌بینی اثر</span></div>
+      </article>
+
+      <div class="ai-core" aria-label="تحلیل و گزارش یکپارچه">
+        <span class="core-glow"></span><span class="orbit orbit-one"></span><span class="orbit orbit-two"></span>
+        <span class="core-chip"><!-- @license lucide-static v1.49.0 - ISC -->
+<svg
+  width="30" height="30" class="icon lucide lucide-brain-circuit"
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z" />
+  <path d="M9 13a4.5 4.5 0 0 0 3-4" />
+  <path d="M6.003 5.125A3 3 0 0 0 6.401 6.5" />
+  <path d="M3.477 10.896a4 4 0 0 1 .585-.396" />
+  <path d="M6 18a4 4 0 0 1-1.967-.516" />
+  <path d="M12 13h4" />
+  <path d="M12 18h6a2 2 0 0 1 2 2v1" />
+  <path d="M12 8h8" />
+  <path d="M16 8V5a2 2 0 0 1 2-2" />
+  <circle cx="16" cy="13" r=".5" />
+  <circle cx="18" cy="3" r=".5" />
+  <circle cx="20" cy="21" r=".5" />
+  <circle cx="20" cy="8" r=".5" />
+</svg></span>
+        
+        <strong>تحلیل و گزارش یکپارچه</strong>
+        
+      </div>
+
+      <article class="outcome-node outcome-delay" data-for="delay" style="--row:0"><span class="outcome-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9 M12 7v5l3 2 M17 3v5h5"/></svg></span><div><strong>پایش به‌موقع تأخیرات</strong><p>مقایسهٔ برنامه و پیشرفت واقعی</p></div></article><article class="outcome-node outcome-cost" data-for="cost" style="--row:1"><span class="outcome-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18 M16 7H10a3 3 0 0 0 0 6h4a3 3 0 0 1 0 6H7"/></svg></span><div><strong>کنترل روشن هزینه‌ها</strong><p>هزینه و قرارداد در یک تصویر</p></div></article><article class="outcome-node outcome-team" data-for="team" style="--row:2"><span class="outcome-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6 M3 20v-2a6 6 0 0 1 12 0v2 M16 5a3 3 0 0 1 0 6 M18 14a5 5 0 0 1 3 4v2"/></svg></span><div><strong>هماهنگی تیم‌ها</strong><p>دسترسی به اطلاعات مشترک</p></div></article><article class="outcome-node outcome-risk" data-for="risk" style="--row:3"><span class="outcome-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2L12 3z M12 9v5 M12 17v1"/></svg></span><div><strong>دیدن زودتر ریسک‌ها</strong><p>بررسی نشانه‌ها در گزارش یکپارچه</p></div></article><article class="outcome-node outcome-scope" data-for="scope" style="--row:4"><span class="outcome-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h14 M14 3l4 4-4 4 M20 17H6 M10 13l-4 4 4 4"/></svg></span><div><strong>پیگیری اثر تغییرات</strong><p>ارتباط تغییر با زمان و هزینه</p></div></article><article class="outcome-node outcome-quality" data-for="quality" style="--row:5"><span class="outcome-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3z M8 12l3 3 5-6"/></svg></span><div><strong>کاهش خطا و دوباره‌کاری</strong><p>اسناد مرتبط و اطلاعات یکپارچه</p></div></article><article class="solution-node">
+        <div class="solution-halo" aria-hidden="true"></div>
+        <div class="solution-icon"><!-- @license lucide-static v1.49.0 - ISC -->
+<svg
+  width="26" height="26" class="icon lucide lucide-zap"
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z" />
+</svg></div>
+        <p>راهکار جامع مدیریت پروژه</p>
+        <h2>پارامتر</h2>
+        <div class="solution-points">
+          <span><!-- @license lucide-static v1.49.0 - ISC -->
+<svg
+  width="14" height="14" class="icon lucide lucide-target"
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="10" />
+  <circle cx="12" cy="12" r="6" />
+  <circle cx="12" cy="12" r="2" />
+</svg> تصمیم دقیق</span>
+          <span><!-- @license lucide-static v1.49.0 - ISC -->
+<svg
+  width="14" height="14" class="icon lucide lucide-boxes"
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z" />
+  <path d="m7 16.5-4.74-2.85" />
+  <path d="m7 16.5 5-3" />
+  <path d="M7 16.5v5.17" />
+  <path d="M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z" />
+  <path d="m17 16.5-5-3" />
+  <path d="m17 16.5 4.74-2.85" />
+  <path d="M17 16.5v5.17" />
+  <path d="M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z" />
+  <path d="M12 8 7.26 5.15" />
+  <path d="m12 8 4.74-2.85" />
+  <path d="M12 13.5V8" />
+</svg> اجرای یکپارچه</span>
+          <span><!-- @license lucide-static v1.49.0 - ISC -->
+<svg
+  width="14" height="14" class="icon lucide lucide-shield-check"
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+  <path d="m9 12 2 2 4-4" />
+</svg> کنترل پیش‌دستانه</span>
+        </div>
+      </article>
+    </div>
+
+    <div class="mobile-flow" aria-hidden="true">
+      <span></span><i></i><span></span><i></i><span></span>
+    </div>
+  </section>
+
+  <footer>
+    <span>پارامتر</span>
+    <p>وضوح بیشتر. تصمیم بهتر. پروژه موفق‌تر.</p>
+    <span class="footer-x"><!-- @license lucide-static v1.49.0 - ISC -->
+<svg
+  width="14" height="14" class="icon lucide lucide-x"
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M18 6 6 18" />
+  <path d="m6 6 12 12" />
+</svg></span>
+  </footer>
+</main>
+
+<script>
+(function () {
+  var problems = {
+    delay: { title: "تأخیر در زمان‌بندی", detail: "وابستگی‌های پنهان و نبود دید لحظه‌ای، تحویل را عقب می‌اندازد.", severity: 78 },
+    cost: { title: "افزایش هزینه‌ها", detail: "تصمیم‌های دیرهنگام و تغییرات کنترل‌نشده بودجه را فرسوده می‌کند.", severity: 91 },
+    team: { title: "ناهماهنگی تیم‌ها", detail: "اطلاعات پراکنده، مالکیت مبهم و ارتباطات جزیره‌ای سرعت را کم می‌کند.", severity: 64 },
+    risk: { title: "ریسک‌های پنهان", detail: "هشدارها زمانی دیده می‌شوند که فرصت واکنش مؤثر از دست رفته است.", severity: 83 },
+    scope: { title: "تغییرات دامنه", detail: "درخواست‌های جدید بدون ارزیابی اثر، تمرکز تیم و برنامه تحویل را مختل می‌کند.", severity: 57 },
+    quality: { title: "افت کیفیت خروجی", detail: "نبود معیارهای مشترک و بازخورد دیرهنگام، دوباره‌کاری و خطای نهایی را افزایش می‌دهد.", severity: 72 }
+  };
+
+  var nodes = document.querySelectorAll(".problem-node");
+  var titleEl = document.getElementById("detail-title");
+  var textEl = document.getElementById("detail-text");
+  var sevEl = document.getElementById("detail-severity");
+
+  nodes.forEach(function (node) {
+    node.addEventListener("click", function () {
+      nodes.forEach(function (other) {
+        other.classList.toggle("is-active", other === node);
+        other.setAttribute("aria-pressed", other === node ? "true" : "false");
+      });
+      var p = problems[node.dataset.id];
+      if (!p) return;
+      titleEl.textContent = p.title;
+      textEl.textContent = p.detail;
+      sevEl.textContent = p.severity + "%";
+    });
+  });
+
+  var paused = false;
+  var page = document.querySelector(".parameter-page");
+  var svg = document.querySelector(".connections");
+  var btn = document.getElementById("pause-btn");
+  var iconPause = document.getElementById("icon-pause");
+  var iconPlay = document.getElementById("icon-play");
+
+  btn.addEventListener("click", function () {
+    paused = !paused;
+    page.classList.toggle("is-paused", paused);
+    iconPause.style.display = paused ? "none" : "";
+    iconPlay.style.display = paused ? "" : "none";
+    btn.setAttribute("aria-label", paused ? "ادامه حرکت" : "توقف حرکت");
+    btn.setAttribute("title", paused ? "ادامه حرکت" : "توقف حرکت");
+    if (paused) { svg.pauseAnimations(); } else { svg.unpauseAnimations(); }
+  });
+})();
+</script>
+<script>
+(()=>{const canvas=document.querySelector('.graph-canvas'),svg=canvas.querySelector('.connections');svg.querySelectorAll('g,path,circle').forEach(el=>{if(!el.closest('defs'))el.remove()});
+const ns='http://www.w3.org/2000/svg';const nodes=[...canvas.querySelectorAll('.problem-node')],core=canvas.querySelector('.ai-core'),solution=canvas.querySelector('.solution-node');
+const edges=nodes.map(node=>[node,core]);edges.push([core,solution]);const outcomes=[...canvas.querySelectorAll(".outcome-node")];outcomes.forEach(node=>edges.push([solution,node]));
+const paths=edges.map(()=>{return ['path-base','path-flow'].map(cls=>{const p=document.createElementNS(ns,'path');p.setAttribute('class',cls);svg.append(p);return p})});
+const orbColors=['#9470e0','#28b6a2','#579cde','#dc80b5','#d9a847','#34bac8','#8b70df'];
+const motions=edges.map((_,i)=>{const circle=document.createElementNS(ns,'circle');circle.setAttribute('class','flow-orb');circle.setAttribute('r',i===edges.length-1?'5':'3.5');circle.setAttribute('fill',orbColors[i%orbColors.length]);circle.style.color=orbColors[i%orbColors.length];circle.setAttribute('stroke','#fff');circle.setAttribute('stroke-width','1');const motion=document.createElementNS(ns,'animateMotion');motion.setAttribute('dur',i===edges.length-1?'2.5s':(3.6+i*.3)+'s');motion.setAttribute('begin',(-i*.65)+'s');motion.setAttribute('repeatCount','indefinite');motion.setAttribute('calcMode','paced');circle.append(motion);svg.append(circle);return motion;});
+
+function draw(){const bounds=canvas.getBoundingClientRect();svg.setAttribute('viewBox','0 0 '+bounds.width+' '+bounds.height);svg.setAttribute('preserveAspectRatio','none');
+const box=el=>{let b=el.getBoundingClientRect();return {x:b.left-bounds.left,y:b.top-bounds.top,w:b.width,h:b.height}};
+edges.forEach(([from,to],i)=>{const a=box(from),b=box(to);let d;
+if(bounds.width>650){let x1=a.x,y1=a.y+a.h/2;const x2=b.x+b.w,y2=b.y+b.h/2;
+if(from.classList.contains('problem-node')){const matrix=new DOMMatrixReadOnly(getComputedStyle(from).transform);x1=a.x+a.w/2-matrix.a*from.offsetWidth/2;y1=a.y+a.h/2-matrix.b*from.offsetWidth/2;}
+const m=(x1+x2)/2;
+ d=from===core?'M '+x1+' '+y1+' L '+x2+' '+y2:'M '+x1+' '+y1+' H '+m+' V '+y2+' H '+x2;
+}else{const x1=a.x+a.w/2,y1=a.y+a.h,x2=b.x+b.w/2,y2=b.y;let m=(y1+y2)/2;
+ if(from.classList.contains('problem-node')){const lane=x1<bounds.width/2?bounds.width*.49:bounds.width*.51;d='M '+x1+' '+y1+' V '+(y1+10)+' H '+lane+' V '+(y2-16)+' H '+x2+' V '+y2;}
+ else if(from===solution){const lane=x2<bounds.width/2?bounds.width*.49:bounds.width*.51;d='M '+x1+' '+y1+' V '+(y1+18)+' H '+lane+' V '+(y2-12)+' H '+x2+' V '+y2;}
+ else d='M '+x1+' '+y1+' L '+x2+' '+y2;
+}paths[i].forEach(p=>p.setAttribute('d',d));motions[i].setAttribute('path',d);});}
+
+new ResizeObserver(draw).observe(canvas);window.addEventListener('resize',draw);document.fonts.ready.then(draw);draw();})();
+</script></body>
+</html>
